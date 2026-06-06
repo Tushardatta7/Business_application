@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(winget install -e --id PostgreSQL.PostgreSQL.17 --accept-source-agreements --accept-package-agreements --override \"--mode unattended --superpassword datta.4321 --servicename postgresql-x64-17 --serverport 5432 --install_runtimes 1\")",
+      "PowerShell(Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex \\(\\(New-Object System.Net.WebClient\\).DownloadString\\('https://community.chocolatey.org/install.ps1'\\)\\))",
+      "PowerShell($env:PATH += \";C:\\\\ProgramData\\\\chocolatey\\\\bin\"; choco install postgresql17 --params '/Password:datta.4321' -y --no-progress)",
+      "PowerShell(cd C:\\\\xampp\\\\htdocs\\\\tal-misri-source; $env:DATABASE_URL=\"postgresql://postgres:datta.4321@localhost:5432/talmisri\"; pnpm --filter @workspace/api-server run dev)",
+      "Read(//c/Users/tusha/.claude/plugins/**)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/ruvnet/ruflo/main/README.md\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/anthropics/claude-code-marketplace/main/plugins/grapify/.claude-plugin/plugin.json\")",
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=grapify+claude+mcp&sort=stars\")",
+      "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(r['full_name'], r['description']\\) for r in data.get\\('items',[]\\)[:5]]\")",
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=grapify&sort=stars&per_page=5\")",
+      "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(r['full_name'], '-', r.get\\('description',''\\)\\) for r in data.get\\('items',[]\\)[:5]]\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/anthropics/claude-plugins/main/.claude-plugin/marketplace.json\")",
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=grapify+claude&per_page=5\")",
+      "Bash(curl -s \"https://registry.npmjs.org/-/v1/search?text=grapify&size=5\")",
+      "Bash(curl -s \"https://registry.npmjs.org/grapify\")",
+      "Bash(pnpm --filter @workspace/db run push)",
+      "Bash(pnpm run *)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill /F /PID 29496)",
+      "Bash(pnpm --filter @workspace/tal-misri run dev)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:8081/api/batches)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:8081/api/cash)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:8081/api/stock)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:8081/api/parties/9999)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:8081/api/batches/9999)",
+      "Bash(Get-ChildItem -Path \"c:\\\\xampp\\\\htdocs\\\\tal-misri-source\\\\artifacts\" -Recurse -Directory)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Format-Table FullName)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:datta.4321@localhost:5432/talmisri\" pnpm run push)",
+      "Bash(dir \"C:\\\\Users\\\\tusha\\\\Desktop\")",
+      "Bash(findstr -i \"logo\\\\|png\\\\|jpg\\\\|svg\\\\|webp\")",
+      "PowerShell(Start-Sleep -Seconds 10; try { $r = Invoke-WebRequest -Uri \"http://localhost:23220\" -UseBasicParsing -ErrorAction Stop; Write-Host \"Frontend: OK \\($\\($r.StatusCode\\)\\)\" } catch { Write-Host \"Frontend: $\\($_.Exception.Message\\)\" })"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\tusha\\.claude"
+    ]
+  }
+}

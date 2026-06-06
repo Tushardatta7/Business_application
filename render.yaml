@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: tal-misri-api
+    env: node
+    plan: free
+    buildCommand: pnpm install && node artifacts/api-server/build.mjs
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production

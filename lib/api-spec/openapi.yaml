@@ -1,0 +1,1118 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Tal Misri Factory Business Management API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: cash
+    description: Daily cash book (Len-Den Khata)
+  - name: parties
+    description: Party ledger (Naame Hisab Khata)
+  - name: ledger
+    description: Party ledger entries
+  - name: production
+    description: Production batches
+  - name: stock
+    description: Stock management
+  - name: dashboard
+    description: Dashboard summaries
+  - name: balance-sheet
+    description: Balance sheet (assets, liabilities, equity)
+  - name: settings
+    description: Application settings (stock rates etc.)
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ── DASHBOARD ──
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get overall business dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  # ── CASH BOOK ──
+  /cash:
+    get:
+      operationId: listCashEntries
+      tags: [cash]
+      summary: List all cash entries
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [income, expense]
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of cash entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CashEntry"
+    post:
+      operationId: createCashEntry
+      tags: [cash]
+      summary: Create a new cash entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCashEntryBody"
+      responses:
+        "201":
+          description: Created cash entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashEntry"
+
+  /cash/{id}:
+    get:
+      operationId: getCashEntry
+      tags: [cash]
+      summary: Get a single cash entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Cash entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashEntry"
+    put:
+      operationId: updateCashEntry
+      tags: [cash]
+      summary: Update a cash entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCashEntryBody"
+      responses:
+        "200":
+          description: Updated cash entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashEntry"
+    delete:
+      operationId: deleteCashEntry
+      tags: [cash]
+      summary: Delete a cash entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /cash/summary/daily:
+    get:
+      operationId: getDailyCashSummary
+      tags: [cash]
+      summary: Get daily cash summary (opening, income, expense, closing)
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Daily summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyCashSummary"
+
+  # ── PARTIES ──
+  /parties:
+    get:
+      operationId: listParties
+      tags: [parties]
+      summary: List all parties (customers/suppliers)
+      responses:
+        "200":
+          description: List of parties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Party"
+    post:
+      operationId: createParty
+      tags: [parties]
+      summary: Create a new party
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePartyBody"
+      responses:
+        "201":
+          description: Created party
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Party"
+
+  /parties/{id}:
+    get:
+      operationId: getParty
+      tags: [parties]
+      summary: Get a party with full ledger entries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Party detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartyDetail"
+    put:
+      operationId: updateParty
+      tags: [parties]
+      summary: Update a party
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePartyBody"
+      responses:
+        "200":
+          description: Updated party
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Party"
+    delete:
+      operationId: deleteParty
+      tags: [parties]
+      summary: Delete a party
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /parties/aging:
+    get:
+      operationId: getAgingReport
+      tags: [parties]
+      summary: Get aging report - who owes what for how long
+      responses:
+        "200":
+          description: Aging report
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgingEntry"
+
+  # ── LEDGER ENTRIES ──
+  /ledger:
+    get:
+      operationId: listLedgerEntries
+      tags: [ledger]
+      summary: List ledger entries for a party
+      parameters:
+        - name: partyId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of ledger entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LedgerEntry"
+    post:
+      operationId: createLedgerEntry
+      tags: [ledger]
+      summary: Create a new ledger entry for a party
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLedgerEntryBody"
+      responses:
+        "201":
+          description: Created ledger entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LedgerEntry"
+
+  /ledger/{id}:
+    delete:
+      operationId: deleteLedgerEntry
+      tags: [ledger]
+      summary: Delete a ledger entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── PRODUCTION BATCHES ──
+  /batches:
+    get:
+      operationId: listBatches
+      tags: [production]
+      summary: List all production batches
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [boiling, curing, ready, harvested]
+      responses:
+        "200":
+          description: List of batches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Batch"
+    post:
+      operationId: createBatch
+      tags: [production]
+      summary: Start a new production batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBatchBody"
+      responses:
+        "201":
+          description: Created batch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Batch"
+
+  /batches/{id}:
+    get:
+      operationId: getBatch
+      tags: [production]
+      summary: Get a single batch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Batch detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Batch"
+    put:
+      operationId: updateBatch
+      tags: [production]
+      summary: Update batch status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBatchBody"
+      responses:
+        "200":
+          description: Updated batch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Batch"
+
+  /batches/{id}/harvest:
+    post:
+      operationId: harvestBatch
+      tags: [production]
+      summary: Record harvest output for a batch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HarvestBody"
+      responses:
+        "200":
+          description: Harvested batch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Batch"
+
+  # ── STOCK ──
+  /stock:
+    get:
+      operationId: getStock
+      tags: [stock]
+      summary: Get current stock levels for all items
+      responses:
+        "200":
+          description: Stock levels
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockSummary"
+
+  /stock/transactions:
+    get:
+      operationId: listStockTransactions
+      tags: [stock]
+      summary: List stock transactions
+      parameters:
+        - name: itemType
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of stock transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockTransaction"
+    post:
+      operationId: createStockTransaction
+      tags: [stock]
+      summary: Add a stock transaction (in/out)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStockTransactionBody"
+      responses:
+        "201":
+          description: Created transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTransaction"
+
+  # ── BALANCE SHEET ──
+  /balance-sheet:
+    get:
+      operationId: getBalanceSheet
+      tags: [balance-sheet]
+      summary: Get balance sheet as of a given date
+      parameters:
+        - name: asOf
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Balance sheet snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceSheet"
+
+  # ── SETTINGS ──
+  /settings/stock-rates:
+    get:
+      operationId: getStockRates
+      tags: [settings]
+      summary: Get inventory cost-per-kg rates for each item
+      responses:
+        "200":
+          description: Stock rates map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockRates"
+    put:
+      operationId: updateStockRates
+      tags: [settings]
+      summary: Update inventory cost-per-kg rates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStockRatesBody"
+      responses:
+        "200":
+          description: Updated stock rates map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockRates"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success, message]
+
+    DashboardSummary:
+      type: object
+      properties:
+        todayCashIn:
+          type: number
+        todayCashOut:
+          type: number
+        totalBaki:
+          type: number
+        activeBatches:
+          type: integer
+        readyBatches:
+          type: integer
+        sugarStock:
+          type: number
+        grade1Stock:
+          type: number
+        grade2Stock:
+          type: number
+        overdueParties:
+          type: integer
+        recentTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/CashEntry"
+      required:
+        - todayCashIn
+        - todayCashOut
+        - totalBaki
+        - activeBatches
+        - readyBatches
+        - sugarStock
+        - grade1Stock
+        - grade2Stock
+        - overdueParties
+        - recentTransactions
+
+    CashEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [income, expense]
+        category:
+          type: string
+        partyId:
+          type: integer
+          nullable: true
+        partyName:
+          type: string
+          nullable: true
+        buyerName:
+          type: string
+          nullable: true
+        saleItems:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, date, amount, type, category, createdAt]
+
+    CreateCashEntryBody:
+      type: object
+      properties:
+        date:
+          type: string
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [income, expense]
+        category:
+          type: string
+        partyId:
+          type: integer
+          nullable: true
+        buyerName:
+          type: string
+          nullable: true
+        saleItems:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+      required: [date, amount, type, category]
+
+    DailyCashSummary:
+      type: object
+      properties:
+        date:
+          type: string
+        openingBalance:
+          type: number
+        totalIncome:
+          type: number
+        totalExpense:
+          type: number
+        closingBalance:
+          type: number
+      required: [date, openingBalance, totalIncome, totalExpense, closingBalance]
+
+    Party:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nameBn:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [customer, supplier, both, loan_given, loan_taken, other]
+        balance:
+          type: number
+        lastTransactionDate:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, name, type, balance, createdAt]
+
+    PartyDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nameBn:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [customer, supplier, both, loan_given, loan_taken, other]
+        balance:
+          type: number
+        lastTransactionDate:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/LedgerEntry"
+      required: [id, name, type, balance, createdAt, entries]
+
+    CreatePartyBody:
+      type: object
+      properties:
+        name:
+          type: string
+        nameBn:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [customer, supplier, both, loan_given, loan_taken, other]
+      required: [name, type]
+
+    LedgerEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        partyId:
+          type: integer
+        date:
+          type: string
+        type:
+          type: string
+          enum: [debit, credit]
+        amount:
+          type: number
+        description:
+          type: string
+        itemType:
+          type: string
+          nullable: true
+          enum: [grade1, grade2, byproduct, null]
+        itemQtyKg:
+          type: number
+          nullable: true
+        pricePerKg:
+          type: number
+          nullable: true
+        runningBalance:
+          type: number
+        createdAt:
+          type: string
+      required: [id, partyId, date, type, amount, description, runningBalance, createdAt]
+
+    CreateLedgerEntryBody:
+      type: object
+      properties:
+        partyId:
+          type: integer
+        date:
+          type: string
+        type:
+          type: string
+          enum: [debit, credit]
+        amount:
+          type: number
+        description:
+          type: string
+        itemType:
+          type: string
+          nullable: true
+          enum: [grade1, grade2, byproduct, null]
+        itemQtyKg:
+          type: number
+          nullable: true
+        pricePerKg:
+          type: number
+          nullable: true
+      required: [partyId, date, type, amount, description]
+
+    AgingEntry:
+      type: object
+      properties:
+        partyId:
+          type: integer
+        partyName:
+          type: string
+        balance:
+          type: number
+        daysSinceLastPayment:
+          type: integer
+          nullable: true
+        bucket:
+          type: string
+          enum: [current, overdue_30, overdue_60, overdue_90plus]
+      required: [partyId, partyName, balance, bucket]
+
+    Batch:
+      type: object
+      properties:
+        id:
+          type: integer
+        batchCode:
+          type: string
+        startDate:
+          type: string
+        expectedEndDate:
+          type: string
+        sugarInputKg:
+          type: number
+        traysCount:
+          type: integer
+        workerName:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [boiling, curing, ready, harvested]
+        daysRemaining:
+          type: integer
+          nullable: true
+        grade1OutputKg:
+          type: number
+          nullable: true
+        grade2OutputKg:
+          type: number
+          nullable: true
+        byproductKg:
+          type: number
+          nullable: true
+        lossKg:
+          type: number
+          nullable: true
+        yieldPercent:
+          type: number
+          nullable: true
+        harvestedAt:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, batchCode, startDate, expectedEndDate, sugarInputKg, traysCount, status, createdAt]
+
+    CreateBatchBody:
+      type: object
+      properties:
+        startDate:
+          type: string
+        sugarInputKg:
+          type: number
+        traysCount:
+          type: integer
+        workerName:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+      required: [startDate, sugarInputKg, traysCount]
+
+    UpdateBatchBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [boiling, curing, ready, harvested]
+        notes:
+          type: string
+          nullable: true
+      required: [status]
+
+    HarvestBody:
+      type: object
+      properties:
+        grade1OutputKg:
+          type: number
+        grade2OutputKg:
+          type: number
+        byproductKg:
+          type: number
+      required: [grade1OutputKg, grade2OutputKg, byproductKg]
+
+    StockSummary:
+      type: object
+      properties:
+        sugar:
+          type: number
+        grade1:
+          type: number
+        grade2:
+          type: number
+        byproduct:
+          type: number
+        sala:
+          type: number
+        gas:
+          type: number
+      required: [sugar, grade1, grade2, byproduct, sala, gas]
+
+    StockTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        itemType:
+          type: string
+          enum: [sugar, grade1, grade2, byproduct, sala, gas]
+        txType:
+          type: string
+          enum: [in, out]
+        quantityKg:
+          type: number
+        date:
+          type: string
+        note:
+          type: string
+          nullable: true
+        batchId:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, itemType, txType, quantityKg, date, createdAt]
+
+    CreateStockTransactionBody:
+      type: object
+      properties:
+        itemType:
+          type: string
+          enum: [sugar, grade1, grade2, byproduct, sala, gas]
+        txType:
+          type: string
+          enum: [in, out]
+        quantityKg:
+          type: number
+        date:
+          type: string
+        note:
+          type: string
+          nullable: true
+        batchId:
+          type: integer
+          nullable: true
+      required: [itemType, txType, quantityKg, date]
+
+    InventoryItem:
+      type: object
+      properties:
+        itemType:
+          type: string
+          enum: [sugar, grade1, grade2, byproduct, sala, gas]
+        quantityKg:
+          type: number
+        ratePerKg:
+          type: number
+        value:
+          type: number
+      required: [itemType, quantityKg, ratePerKg, value]
+
+    BalanceSheetAssets:
+      type: object
+      properties:
+        cashAndBank:
+          type: number
+        inventory:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryItem"
+        inventoryTotal:
+          type: number
+        receivables:
+          type: number
+        advancesPaid:
+          type: number
+        loanGiven:
+          type: number
+        receivablesOther:
+          type: number
+        total:
+          type: number
+      required:
+        - cashAndBank
+        - inventory
+        - inventoryTotal
+        - receivables
+        - advancesPaid
+        - loanGiven
+        - receivablesOther
+        - total
+
+    BalanceSheetLiabilities:
+      type: object
+      properties:
+        payablesSupplier:
+          type: number
+        payablesOther:
+          type: number
+        advancesReceived:
+          type: number
+        loanTaken:
+          type: number
+        total:
+          type: number
+      required:
+        - payablesSupplier
+        - payablesOther
+        - advancesReceived
+        - loanTaken
+        - total
+
+    BalanceSheetEquity:
+      type: object
+      properties:
+        capital:
+          type: number
+        retainedEarnings:
+          type: number
+        total:
+          type: number
+      required: [capital, retainedEarnings, total]
+
+    BalanceSheet:
+      type: object
+      properties:
+        asOf:
+          type: string
+        assets:
+          $ref: "#/components/schemas/BalanceSheetAssets"
+        liabilities:
+          $ref: "#/components/schemas/BalanceSheetLiabilities"
+        equity:
+          $ref: "#/components/schemas/BalanceSheetEquity"
+        imbalance:
+          type: number
+      required: [asOf, assets, liabilities, equity, imbalance]
+
+    StockRates:
+      type: object
+      properties:
+        sugar:
+          type: number
+        grade1:
+          type: number
+        grade2:
+          type: number
+        byproduct:
+          type: number
+        sala:
+          type: number
+        gas:
+          type: number
+      required: [sugar, grade1, grade2, byproduct, sala, gas]
+
+    UpdateStockRatesBody:
+      type: object
+      properties:
+        sugar:
+          type: number
+        grade1:
+          type: number
+        grade2:
+          type: number
+        byproduct:
+          type: number
+        sala:
+          type: number
+        gas:
+          type: number
