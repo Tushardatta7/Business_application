@@ -38,9 +38,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        env:
-          npm_config_user_agent: pnpm/latest npm/0 node/20 linux x64
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build frontend
         run: pnpm --filter @workspace/tal-misri run build
