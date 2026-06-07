@@ -1,0 +1,62 @@
+name: Deploy Frontend to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: "API tunnel URL (e.g. https://xxx.trycloudflare.com)"
+        required: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          npm_config_user_agent: pnpm/latest npm/0 node/20 linux x64
+
+      - name: Build frontend
+        run: pnpm --filter @workspace/tal-misri run build
+        env:
+          PORT: "5173"
+          BASE_PATH: /Business_application/
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+
+      - name: Add 404 fallback for SPA routing
+        run: cp artifacts/tal-misri/dist/public/index.html artifacts/tal-misri/dist/public/404.html
+
+      - uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/tal-misri/dist/public
+
+      - uses: actions/deploy-pages@v4
+        id: deployment
